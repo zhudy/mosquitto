@@ -101,6 +101,14 @@ static void temp__expire_websockets_clients(struct mosquitto_db *db)
 }
 #endif
 
+#if defined(WITH_WEBSOCKETS) && LWS_LIBRARY_VERSION_NUMBER == 3002000
+void lws__sul_callback(struct lws_sorted_usec_list *l)
+{
+}
+
+static struct lws_sorted_usec_list sul;
+#endif
+
 int mosquitto_main_loop(struct mosquitto_db *db, mosq_sock_t *listensock, int listensock_count)
 {
 #ifdef WITH_SYS_TREE
@@ -130,8 +138,11 @@ int mosquitto_main_loop(struct mosquitto_db *db, mosq_sock_t *listensock, int li
 	int err;
 	socklen_t len;
 #endif
-	time_t expiration_check_time = 0;
-	char *id;
+
+
+#if defined(WITH_WEBSOCKETS) && LWS_LIBRARY_VERSION_NUMBER == 3002000
+	memset(&sul, 0, sizeof(struct lws_sorted_usec_list));
+#endif
 
 #ifndef WIN32
 	sigemptyset(&sigblock);
@@ -155,10 +166,6 @@ int mosquitto_main_loop(struct mosquitto_db *db, mosq_sock_t *listensock, int li
 		return MOSQ_ERR_NOMEM;
 	}
 #endif
-
-	if(db->config->persistent_client_expiration > 0){
-		expiration_check_time = time(NULL) + 3600;
-	}
 
 #ifdef WITH_EPOLL
 	db->epollfd = 0;
@@ -458,31 +465,6 @@ int mosquitto_main_loop(struct mosquitto_db *db, mosq_sock_t *listensock, int li
 			}
 		}
 #endif
-		now = time(NULL);
-		if(db->config->persistent_client_expiration > 0 && now > expiration_check_time){
-			HASH_ITER(hh_id, db->contexts_by_id, context, ctxt_tmp){
-				if(context->sock == INVALID_SOCKET && context->session_expiry_interval > 0 && context->session_expiry_interval != UINT32_MAX){
-					/* This is a persistent client, check to see if the
-					 * last time it connected was longer than
-					 * persistent_client_expiration seconds ago. If so,
-					 * expire it and clean up.
-					 */
-					if(now > context->session_expiry_time){
-						if(context->id){
-							id = context->id;
-						}else{
-							id = "<unknown>";
-						}
-						log__printf(NULL, MOSQ_LOG_NOTICE, "Expiring persistent client %s due to timeout.", id);
-						G_CLIENTS_EXPIRED_INC();
-						context->session_expiry_interval = 0;
-						context__set_state(context, mosq_cs_expiring);
-						do_disconnect(db, context, MOSQ_ERR_SUCCESS);
-					}
-				}
-			}
-			expiration_check_time = time(NULL) + 3600;
-		}
 
 #ifndef WIN32
 		sigprocmask(SIG_SETMASK, &sigblock, &origsig);
@@ -603,6 +585,9 @@ int mosquitto_main_loop(struct mosquitto_db *db, mosq_sock_t *listensock, int li
 			if(db->config->listeners[i].ws_context){
 #if LWS_LIBRARY_VERSION_NUMBER > 3002000
 				libwebsocket_service(db->config->listeners[i].ws_context, -1);
+#elif LWS_LIBRARY_VERSION_NUMBER == 3002000
+				lws_sul_schedule(db->config->listeners[i].ws_context, 0, &sul, lws__sul_callback, 10);
+				libwebsocket_service(db->config->listeners[i].ws_context, 0);
 #else
 				libwebsocket_service(db->config->listeners[i].ws_context, 0);
 #endif
@@ -644,7 +629,7 @@ void do_disconnect(struct mosquitto_db *db, struct mosquitto *context, int reaso
 		}
 
 		if(context->state != mosq_cs_disconnecting && context->state != mosq_cs_disconnect_with_will){
-			context__set_state(context, mosq_cs_disconnect_ws);
+			mosquitto__set_state(context, mosq_cs_disconnect_ws);
 		}
 		if(context->wsi){
 			libwebsocket_callback_on_writable(context->ws_context, context->wsi);
@@ -784,7 +769,7 @@ static void loop_handle_reads_writes(struct mosquitto_db *db, struct pollfd *pol
 				len = sizeof(int);
 				if(!getsockopt(context->sock, SOL_SOCKET, SO_ERROR, (char *)&err, &len)){
 					if(err == 0){
-						context__set_state(context, mosq_cs_new);
+						mosquitto__set_state(context, mosq_cs_new);
 #if defined(WITH_ADNS) && defined(WITH_BRIDGE)
 						if(context->bridge){
 							bridge__connect_step3(db, context);
