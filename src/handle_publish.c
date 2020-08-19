@@ -184,9 +184,23 @@ int handle__publish(struct mosquitto_db *db, struct mosquitto *context)
 		db__message_store_find(context, mid, &stored);
 	}
 	if(!stored){
-		dup = 0;
-		if(db__message_store(db, context, mid, topic, qos, payloadlen, &payload, retain, &stored, 0)){
-			return 1;
+		if(qos == 0
+				|| db__ready_for_flight(context, qos)
+				|| db__ready_for_queue(context, qos)){
+
+			dup = 0;
+			if(db__message_store(db, context, mid, topic, qos, payloadlen, &payload, retain, &stored, 0)){
+				return 1;
+			}
+		}else{
+			/* Client isn't allowed any more incoming messages, so fail early */
+			mosquitto__free(topic);
+			UHPA_FREE(payload, payloadlen);
+			if(qos == 1){
+				return send__puback(context, mid);
+			}else{
+				return send__pubrec(context, mid);
+			}
 		}
 	}else{
 		mosquitto__free(topic);

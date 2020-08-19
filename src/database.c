@@ -36,7 +36,7 @@ static unsigned long max_queued_bytes = 0;
  * @param qos qos for the packet of interest
  * @return true if more in flight are allowed.
  */
-static bool db__ready_for_flight(struct mosquitto *context, int qos)
+bool db__ready_for_flight(struct mosquitto *context, int qos)
 {
 	if(qos == 0 || (max_inflight == 0 && max_inflight_bytes == 0)){
 		return true;
@@ -64,7 +64,7 @@ static bool db__ready_for_flight(struct mosquitto *context, int qos)
  * @param qos destination qos for the packet of interest
  * @return true if queuing is allowed, false if should be dropped
  */
-static bool db__ready_for_queue(struct mosquitto *context, int qos)
+bool db__ready_for_queue(struct mosquitto *context, int qos)
 {
 	if(max_queued == 0 && max_queued_bytes == 0){
 		return true;
