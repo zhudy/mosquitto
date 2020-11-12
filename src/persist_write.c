@@ -177,9 +177,9 @@ static int persist__client_save(struct mosquitto_db *db, FILE *db_fptr)
 			if(context->username){
 				chunk.F.username_len = strlen(context->username);
 				chunk.username = context->username;
-				if(context->listener){
-					chunk.F.listener_port = context->listener->port;
-				}
+			}
+			if(context->listener){
+				chunk.F.listener_port = context->listener->port;
 			}
 
 			rc = persist__chunk_client_write_v6(db_fptr, &chunk);
