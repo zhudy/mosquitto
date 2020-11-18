@@ -5,6 +5,9 @@ Broker:
   username. Closes #1891.
 - Fix file logging on Windows. Closes #1880.
 
+Client library:
+- Fix build on Mac Big Sur. Closes #1905.
+
 
 1.6.12 - 2020-08-19
 ===================
