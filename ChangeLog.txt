@@ -4,6 +4,7 @@ Broker:
   file and `per_listener_settings true` is set and the client did not set a
   username. Closes #1891.
 - Fix file logging on Windows. Closes #1880.
+- Fix bridge sock not being removed from sock hash on error. Closes #1897.
 
 Client library:
 - Fix build on Mac Big Sur. Closes #1905.
