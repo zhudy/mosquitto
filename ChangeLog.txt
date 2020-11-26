@@ -9,6 +9,10 @@ Broker:
 Client library:
 - Fix build on Mac Big Sur. Closes #1905.
 
+Clients:
+- mosquitto_sub will now quit with an error if the %U option is used on
+  Windows, rather than just quitting. Closes #1908.
+
 
 1.6.12 - 2020-08-19
 ===================
