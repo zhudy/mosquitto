@@ -25,6 +25,7 @@ build64/
 client/mosquitto_pub
 client/mosquitto_rr
 client/mosquitto_sub
+client/mosquitto_bridge
 client/testing
 client/testing.c
 

@@ -7,6 +7,7 @@ all : mosquitto
 OBJS=	mosquitto.o \
 		alias_mosq.o \
 		bridge.o \
+		bridge_dynamic.o \
 		bridge_topic.o \
 		conf.o \
 		conf_includedir.o \
@@ -91,6 +92,9 @@ alias_mosq.o : ../lib/alias_mosq.c ../lib/alias_mosq.h
 	${CROSS_COMPILE}${CC} $(BROKER_CPPFLAGS) $(BROKER_CFLAGS) -c $< -o $@
 
 bridge.o : bridge.c mosquitto_broker_internal.h
+	${CROSS_COMPILE}${CC} $(BROKER_CPPFLAGS) $(BROKER_CFLAGS) -c $< -o $@
+
+bridge_dynamic.o : bridge_dynamic.c mosquitto_broker_internal.h
 	${CROSS_COMPILE}${CC} $(BROKER_CPPFLAGS) $(BROKER_CFLAGS) -c $< -o $@
 
 bridge_topic.o : bridge_topic.c mosquitto_broker_internal.h
@@ -330,7 +334,7 @@ uninstall :
 	-rm -f "${DESTDIR}${prefix}/include/mosquitto_broker.h"
 	-rm -f "${DESTDIR}${prefix}/include/mosquitto_plugin.h"
 
-clean : 
+clean :
 	-rm -f *.o mosquitto *.gcda *.gcno
 
 reallyclean : clean

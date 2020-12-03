@@ -4,12 +4,12 @@ Copyright (c) 2011-2020 Roger Light <roger@atchoo.org>
 All rights reserved. This program and the accompanying materials
 are made available under the terms of the Eclipse Public License 2.0
 and Eclipse Distribution License v1.0 which accompany this distribution.
- 
+
 The Eclipse Public License is available at
    https://www.eclipse.org/legal/epl-2.0/
 and the Eclipse Distribution License is available at
   http://www.eclipse.org/org/documents/edl-v10.php.
- 
+
 SPDX-License-Identifier: EPL-2.0 OR EDL-1.0
 
 Contributors:
@@ -257,7 +257,7 @@ int security__load_v4(struct mosquitto__auth_plugin *plugin, struct mosquitto_op
 
 	plugin->auth_start_v4 = (FUNC_auth_plugin_auth_start_v4)LIB_SYM(lib, "mosquitto_auth_start");
 	plugin->auth_continue_v4 = (FUNC_auth_plugin_auth_continue_v4)LIB_SYM(lib, "mosquitto_auth_continue");
-	
+
 	if(plugin->auth_start_v4){
 		if(plugin->auth_continue_v4){
 			log__printf(NULL, MOSQ_LOG_INFO,
@@ -643,7 +643,7 @@ static int acl__check_single(struct mosquitto__auth_plugin_config *auth_plugin, 
 }
 
 
-static int acl__check_dollar(const char *topic, int access)
+static int acl__check_dollar(struct mosquitto_db *db, const char *topic, int access)
 {
 	int rc;
 	bool match = false;
@@ -669,8 +669,21 @@ static int acl__check_dollar(const char *topic, int access)
 		}else{
 			return MOSQ_ERR_ACL_DENIED;
 		}
+	}else if(!strncmp(topic, "$BRIDGE", 7)){
+		/* Check if demand concern bridge dynamic */
+		if(db->config->allow_sys_update){
+			if((strncmp("$BRIDGE/new",topic,11))==0){
+				log__printf(NULL, MOSQ_LOG_DEBUG, "Bridge New");
+				return MOSQ_ERR_SUCCESS;
+			}
+			if((strncmp("$BRIDGE/del",topic,11))==0) {
+				log__printf(NULL, MOSQ_LOG_DEBUG, "Bridge Del");
+				return MOSQ_ERR_SUCCESS;
+			}
+		} else { log__printf(NULL, MOSQ_LOG_DEBUG, "You must activate allow_sys_update"); }
 	}else{
 		/* This is an unknown $ topic, for the moment just defer to actual tests. */
+		log__printf(NULL, MOSQ_LOG_DEBUG, "Topic with $ forbidden");
 		return MOSQ_ERR_SUCCESS;
 	}
 }
@@ -692,10 +705,10 @@ int mosquitto_acl_check(struct mosquitto *context, const char *topic, uint32_t p
 		return MOSQ_ERR_SUCCESS;
 	}
 
-	rc = acl__check_dollar(topic, access);
+	rc = acl__check_dollar(&db, topic, access);
 	if(rc) return rc;
 
-	/* 
+	/*
 	 * If no plugins exist we should accept at this point so set rc to success.
 	 */
 	rc = MOSQ_ERR_SUCCESS;
@@ -782,7 +795,7 @@ int mosquitto_unpwd_check(struct mosquitto *context)
 	}
 
 	for(i=0; i<opts->auth_plugin_config_count; i++){
-		if(opts->auth_plugin_configs[i].plugin.version == 4 
+		if(opts->auth_plugin_configs[i].plugin.version == 4
 				&& opts->auth_plugin_configs[i].plugin.unpwd_check_v4){
 
 			rc = opts->auth_plugin_configs[i].plugin.unpwd_check_v4(
@@ -824,7 +837,7 @@ int mosquitto_unpwd_check(struct mosquitto *context)
 			if(context->username == NULL &&
 					((db.config->per_listener_settings && context->listener->security_options.allow_anonymous != false)
 					|| (!db.config->per_listener_settings && db.config->security_options.allow_anonymous != false))){
-	
+
 				return MOSQ_ERR_SUCCESS;
 			}else{
 				return MOSQ_ERR_AUTH;

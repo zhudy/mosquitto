@@ -65,7 +65,7 @@ WITH_SYSTEMD:=no
 WITH_SRV:=no
 
 # Build with websockets support on the broker.
-WITH_WEBSOCKETS:=no
+WITH_WEBSOCKETS:=yes
 
 # Use elliptic keys in broker
 WITH_EC:=yes
@@ -125,7 +125,11 @@ WITH_XTREPORT=no
 
 # Also bump lib/mosquitto.h, CMakeLists.txt,
 # installer/mosquitto.nsi, installer/mosquitto64.nsi
+<<<<<<< cc47eaba09d024fc76915f3fd42c364b7cf5b309
 VERSION=2.0.2
+=======
+VERSION=2.0.0.D
+>>>>>>> Bridge Dynamic Update 2.0.0
 
 # Client library SO version. Bump if incompatible API/ABI changes are made.
 SOVERSION=1
@@ -166,8 +170,8 @@ BROKER_CFLAGS:=${CFLAGS} -DVERSION="\"${VERSION}\"" -DWITH_BROKER
 BROKER_LDFLAGS:=${LDFLAGS}
 BROKER_LDADD:=
 
-CLIENT_CPPFLAGS:=$(CPPFLAGS) -I.. -I../include
-CLIENT_CFLAGS:=${CFLAGS} -DVERSION="\"${VERSION}\""
+CLIENT_CPPFLAGS:=$(CPPFLAGS) -I.. -I../include -I../lib
+CLIENT_CFLAGS:=${CFLAGS} -I../src -DVERSION="\"${VERSION}\""
 CLIENT_LDFLAGS:=$(LDFLAGS) -L../lib
 CLIENT_LDADD:=
 
@@ -187,6 +191,7 @@ endif
 
 ifeq ($(UNAME),Linux)
 	BROKER_LDADD:=$(BROKER_LDADD) -lrt
+	BROKER_LIBS:=$(BROKER_LIBS) -lanl
 	BROKER_LDFLAGS:=$(BROKER_LDFLAGS) -Wl,--dynamic-list=linker.syms
 	LIB_LIBADD:=$(LIB_LIBADD) -lrt
 endif
@@ -348,6 +353,7 @@ endif
 
 ifeq ($(WITH_BUNDLED_DEPS),yes)
 	BROKER_CPPFLAGS:=$(BROKER_CPPFLAGS) -I../deps
+	CLIENT_CFLAGS:=$(CLIENT_CFLAGS) -I../deps
 	LIB_CPPFLAGS:=$(LIB_CPPFLAGS) -I../deps
 	PLUGIN_CPPFLAGS:=$(PLUGIN_CPPFLAGS) -I../../deps
 endif
@@ -364,7 +370,13 @@ ifeq ($(WITH_COVERAGE),yes)
 endif
 
 ifeq ($(WITH_CJSON),yes)
+<<<<<<< cc47eaba09d024fc76915f3fd42c364b7cf5b309
 	CLIENT_CFLAGS:=$(CLIENT_CFLAGS) -DWITH_CJSON
+=======
+	BROKER_CFLAGS:=$(BROKER_CFLAGS) -DWITH_CJSON -I/usr/include/cjson -I/usr/local/include/cjson
+	BROKER_LDADD:=$(BROKER_LDADD) -lcjson
+	CLIENT_CFLAGS:=$(CLIENT_CFLAGS) -DWITH_CJSON -I/usr/include/cjson -I/usr/local/include/cjson
+>>>>>>> Bridge Dynamic Update 2.0.0
 	CLIENT_LDADD:=$(CLIENT_LDADD) -lcjson
 	CLIENT_STATIC_LDADD:=$(CLIENT_STATIC_LDADD) -lcjson
 	CLIENT_LDFLAGS:=$(CLIENT_LDFLAGS)
