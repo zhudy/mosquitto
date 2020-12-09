@@ -2,6 +2,7 @@ Broker:
 - Fix crash on Windows if loading a plugin fails. Closes #1866.
 - Fix DH group not being set for TLS connections, which meant ciphers using
   DHE couldn't be used. Closes #1925. Closes #1476.
+
 - Fix listener not being reassociated with client when reloading a persistence
   file and `per_listener_settings true` is set and the client did not set a
   username. Closes #1891.
@@ -10,6 +11,8 @@ Broker:
 
 Client library:
 - Fix build on Mac Big Sur. Closes #1905.
+- Fix DH group not being set for TLS connections, which meant ciphers using
+  DHE couldn't be used. Closes #1925. Closes #1476.
 
 Clients:
 - mosquitto_sub will now quit with an error if the %U option is used on
