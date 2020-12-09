@@ -44,8 +44,6 @@ And to publish a message:
 
 ## To dynamically create/delete/show a bridge, use:
 
-  Set allow_sys_update with true value in mosquitto.conf file.
-
   Mosquitto broker implement SYS-Topics. All SYS-Topics start $SYS and are read-only for MQTT clients.
   To dynamically create or delete a bridge, mosquitto use new topics: BRIDGE-Topics.
   All BRIDGE-Topics start with $BRIDGE and are read-write with ACL Protection.

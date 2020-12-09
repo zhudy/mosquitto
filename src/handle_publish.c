@@ -256,13 +256,11 @@ int handle__publish(struct mosquitto *context)
 
 	/* Check if demand concern bridge dynamic */
 	if(!strncmp(msg->topic, "$BRIDGE/", 8)){
-	  if(db.config->allow_sys_update){
 		  rc = bridge__dynamic_analyse(&db, msg->topic, msg->payload, msg->payloadlen);
 		  if(rc == MOSQ_ERR_BRIDGE_DYNA ){
 			  log__printf(NULL, MOSQ_LOG_DEBUG, "PUBLISH Invalid bridge dynamic configuration on $BRIDGE.");
 			  rc = 0; /* To not disturbe normal publish management */
 		  }
-	  }
 	}
 
 	if(!strncmp(msg->topic, "$CONTROL/", 9)){

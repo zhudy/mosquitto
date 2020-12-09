@@ -251,7 +251,6 @@ typedef struct mosquitto_plugin_id_t{
 
 struct mosquitto__config {
 	bool allow_duplicate_messages;
-	bool allow_sys_update;
 	int autosave_interval;
 	bool autosave_on_changes;
 	bool check_retain_source;

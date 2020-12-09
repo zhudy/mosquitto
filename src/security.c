@@ -643,7 +643,7 @@ static int acl__check_single(struct mosquitto__auth_plugin_config *auth_plugin, 
 }
 
 
-static int acl__check_dollar(struct mosquitto_db *db, const char *topic, int access)
+static int acl__check_dollar(const char *topic, int access)
 {
 	int rc;
 	bool match = false;
@@ -671,7 +671,6 @@ static int acl__check_dollar(struct mosquitto_db *db, const char *topic, int acc
 		}
 	}else if(!strncmp(topic, "$BRIDGE", 7)){
 		/* Check if demand concern bridge dynamic */
-		if(db->config->allow_sys_update){
 			if((strncmp("$BRIDGE/new",topic,11))==0){
 				log__printf(NULL, MOSQ_LOG_DEBUG, "Bridge New");
 				return MOSQ_ERR_SUCCESS;
@@ -680,7 +679,7 @@ static int acl__check_dollar(struct mosquitto_db *db, const char *topic, int acc
 				log__printf(NULL, MOSQ_LOG_DEBUG, "Bridge Del");
 				return MOSQ_ERR_SUCCESS;
 			}
-		} else { log__printf(NULL, MOSQ_LOG_DEBUG, "You must activate allow_sys_update"); }
+		}
 	}else{
 		/* This is an unknown $ topic, for the moment just defer to actual tests. */
 		log__printf(NULL, MOSQ_LOG_DEBUG, "Topic with $ forbidden");
@@ -705,7 +704,7 @@ int mosquitto_acl_check(struct mosquitto *context, const char *topic, uint32_t p
 		return MOSQ_ERR_SUCCESS;
 	}
 
-	rc = acl__check_dollar(&db, topic, access);
+	rc = acl__check_dollar(topic, access);
 	if(rc) return rc;
 
 	/*
