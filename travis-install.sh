@@ -10,10 +10,6 @@ if [ "$TRAVIS_OS_NAME" == "linux" ]; then
 fi
 
 if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-<<<<<<< cc47eaba09d024fc76915f3fd42c364b7cf5b309
-=======
-	#brew update
->>>>>>> Bridge Dynamic Update 2.0.0
 	HOMEBREW_NO_AUTO_UPDATE=1 brew install c-ares cjson openssl libwebsockets
 fi
 

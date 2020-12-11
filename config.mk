@@ -366,13 +366,9 @@ ifeq ($(WITH_COVERAGE),yes)
 endif
 
 ifeq ($(WITH_CJSON),yes)
-<<<<<<< cc47eaba09d024fc76915f3fd42c364b7cf5b309
-	CLIENT_CFLAGS:=$(CLIENT_CFLAGS) -DWITH_CJSON
-=======
-	BROKER_CFLAGS:=$(BROKER_CFLAGS) -DWITH_CJSON -I/usr/include/cjson -I/usr/local/include/cjson
+	BROKER_CFLAGS:=$(BROKER_CFLAGS) -DWITH_CJSON
 	BROKER_LDADD:=$(BROKER_LDADD) -lcjson
-	CLIENT_CFLAGS:=$(CLIENT_CFLAGS) -DWITH_CJSON -I/usr/include/cjson -I/usr/local/include/cjson
->>>>>>> Bridge Dynamic Update 2.0.0
+	CLIENT_CFLAGS:=$(CLIENT_CFLAGS) -DWITH_CJSON
 	CLIENT_LDADD:=$(CLIENT_LDADD) -lcjson
 	CLIENT_STATIC_LDADD:=$(CLIENT_STATIC_LDADD) -lcjson
 	CLIENT_LDFLAGS:=$(CLIENT_LDFLAGS)
