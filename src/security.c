@@ -679,7 +679,6 @@ static int acl__check_dollar(const char *topic, int access)
 				log__printf(NULL, MOSQ_LOG_DEBUG, "Bridge Del");
 				return MOSQ_ERR_SUCCESS;
 			}
-		}
 	}else{
 		/* This is an unknown $ topic, for the moment just defer to actual tests. */
 		log__printf(NULL, MOSQ_LOG_DEBUG, "Topic with $ forbidden");
