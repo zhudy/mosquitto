@@ -80,7 +80,7 @@ endif (WITH_BUNDLED_DEPS)
 option(INC_BRIDGE_SUPPORT
 	"Include bridge support for connecting to other brokers?" ON)
 if (INC_BRIDGE_SUPPORT)
-	set (MOSQ_SRCS ${MOSQ_SRCS} bridge.c)
+	set (MOSQ_SRCS ${MOSQ_SRCS} bridge.c bridge_dynamic.c)
 	add_definitions("-DWITH_BRIDGE")
 endif (INC_BRIDGE_SUPPORT)
 

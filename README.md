@@ -42,6 +42,51 @@ And to publish a message:
 
     mosquitto_pub -t 'test/topic' -m 'hello world'
 
+## To dynamically create/delete/show a bridge, use:
+
+  Mosquitto broker implement SYS-Topics. All SYS-Topics start $SYS and are read-only for MQTT clients.
+  To dynamically create or delete a bridge, mosquitto use new topics: BRIDGE-Topics.
+  All BRIDGE-Topics start with $BRIDGE and are read-write with ACL Protection.
+
+  Create Bridge:
+
+      mosquitto_bridge -p 1883 -c testBridge -a 127.0.0.1 -R 1884 -n -t \# -q 0 -l local/ -r remote/ -D both
+      mosquitto_bridge -p 1883 -c testBridge -a 127.0.0.1 -R 1884 -n -t \# -q 0 -l test/1883/ -r test/1884/ -D both
+
+      with json format:
+      mosquitto_bridge -p 1883 -c testBridge -a 127.0.0.1 -R 1884 -n -j -t \# -q 0 -l test/1883/ -r test/1884/ -D both
+
+      or via publish message to create a bridge:
+
+      mosquitto_pub -h 127.0.0.1 -p 1883 -t '$BRIDGE/new' -m 'connection testBridge
+      address 127.0.0.1:1884
+      topic # both 0 test/1883/ test/1884/
+      '
+
+      with json format:
+      mosquitto_pub -h 127.0.0.1 -p 1883 -t '$BRIDGE/new' -m '{"bridges":[{"connection":"testBridge","addresses":[{"address":"127.0.0.1","port":1884}],"topic":"#","direction":"both","qos":0,"local_prefix":"test/1883/","remote_prefix":"test/1884/"}]}'
+
+  Delete Bridge:
+
+      mosquitto_bridge -p 1883 -c testBridge -d
+
+      with json format:
+      mosquitto_bridge -p 1883 -c testBridge -d -j
+
+      or via publish message to delete a bridge:
+
+      mosquitto_pub -h 127.0.0.1 -p 1883 -t '$BRIDGE/del' -m 'connection testBridge'
+
+      with json format:
+      mosquitto_pub -h 127.0.0.1 -p 1883 -t '$BRIDGE/del' -m '{"connection":"testBridge"}'
+
+      Show all Bridges:
+
+      mosquitto_bridge -p 1883 -k
+
+      with json format:
+      mosquitto_bridge -p 1883 -k -j
+
 ## Documentation
 
 Documentation for the broker, clients and client library API can be found in
